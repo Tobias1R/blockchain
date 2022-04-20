@@ -1,0 +1,1 @@
+tentativas(ainda frustradas) de criar uma moeda.

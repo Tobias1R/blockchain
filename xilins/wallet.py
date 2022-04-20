@@ -26,6 +26,7 @@ class Wallet:
         self.wallet_hash = hash_id
     
     def identify_token(self,token,ledger_data):
+        
         token_ledger = sha512(str(json.dumps(ledger_data)+str(self.key)).encode()).hexdigest()
         #print('TOKEN ID:',json.dumps(ledger_data))
         return bool(token==token_ledger)
@@ -36,6 +37,7 @@ class Wallet:
         
         ledger = server.ledger
         #print('LEDGER',ledger)
+        print('PARTICIPANT',self.hash_id)
         for h in ledger:
             #print('HASH',h)
             if isinstance(ledger[h],Block):
@@ -44,11 +46,11 @@ class Wallet:
                 node:Block = Block.load_ledger_data(ledger[h],len(ledger))
             #print('LEDGER NODE TRANSACTIONS',node.get_transactions())
             for t in node.get_transactions():
-                print('TRANSACTION',t.ledger_data)
-                if self.identify_token(t.destination,t.ledger_data):
-                    print('DUDE, you received something!')
+                #print('TRANSACTION',t.ledger_data)
+                if t.destination == self.hash_id:
+                    #print('DUDE, you received something!')
                     self.balance += float(t.value)
-                if self.identify_token(t.source,t.ledger_data):
+                if self.token(t) == t.token :
                     self.balance -= float(t.value)
     
     @property
@@ -58,8 +60,11 @@ class Wallet:
     
     def token(self, transaction:Transaction):
         transaction.source = self.hash_id
-        print('TOKENIZE:',json.dumps(transaction.ledger_data))        
-        return sha512(str(json.dumps(transaction.ledger_data)+str(self.key)).encode()).hexdigest()
+        #print('TOKENIZE:',json.dumps(transaction.ledger_data))   
+        ledger = transaction.ledger_data
+        # remove token from data
+        ledger.pop(-1)
+        return sha512(str(json.dumps(ledger)+str(self.key)).encode()).hexdigest()
     
     def send(self,destination:str,value:float):
         pass

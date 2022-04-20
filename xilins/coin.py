@@ -3,6 +3,8 @@ from hashlib import sha256, sha512
 from datetime import datetime
 import json
 xil = 0.00000001
+__xilinversion__ = '0.0.1-alpha-rc0'
+
 class RouterReference:
     hash_id: str = ''
     ip_add: ipaddress.ip_address = ipaddress.ip_address('127.0.0.1')
@@ -34,7 +36,8 @@ class Transaction:
         self.fee: float = xil
         self.fee_destination: str = None
         self.timestamp:str = ''
-        self.confirmations:list = []
+        
+        
     
     @property
     def ledger_data(self):
@@ -102,6 +105,7 @@ class Block:
         self.host: str = '127.0.0.1'
         self.ledger_index: int = ledger_index
         self.status:int = 1 #opened
+        self.version:str = __xilinversion__
         
     
     def is_full(self):
@@ -111,7 +115,9 @@ class Block:
         #print('ADDTRANSACTION')
         if len(self.transactions) <= self.MAX_TRANSACTIONS:
             #print('ADDTRANSACTION','<=')
-            data = json.dumps(transaction.ledger_data,separators=(',', ':'))
+            data = json.dumps(transaction.ledger_data,
+                              separators=(',', ':'))
+            data = transaction
             if not data in self.transactions:
                 #print('ADDTRANSACTION','not in')
                 self.transactions.append(data)
@@ -149,7 +155,7 @@ class Block:
     
     def get_ledger_data(self,ret='json'):
         data = {}  
-        print(self.transactions)     
+        #print(self.transactions)     
         if ret == 'json':
             transactions = [json.loads(l) for l in self.transactions]
         if ret == 'object':
